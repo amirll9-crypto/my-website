@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>המוצרים שלי</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;background:#f5f5f5;color:#222}
+main{max-width:520px;margin:auto;padding:24px 16px}
+h1{text-align:center;margin-bottom:24px}
+.card{background:white;border-radius:18px;padding:16px;margin:16px 0;box-shadow:0 4px 18px #0001}
+.card img{width:100%;border-radius:12px;display:block}
+.price{font-size:24px;font-weight:bold;margin:12px 0}
+button{width:100%;border:0;border-radius:12px;padding:14px;font-size:18px;font-weight:bold;background:#25D366;color:white;cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+<h1>המוצרים שלי</h1>
+<div class="card">
+  <img src="product1.jpg" alt="משקולת מתכווננת">
+  <h2>משקולת מתכווננת</h2>
+  <div class="price">500 ₪</div>
+  <button onclick="wa('משקולת מתכווננת')">אני מעוניין במוצר</button>
+</div>
+<div class="card">
+  <img src="product2.jpg" alt="מקרר ויטרינה AURA">
+  <h2>מקרר ויטרינה AURA</h2>
+  <div class="price">450 ₪</div>
+  <button onclick="wa('מקרר ויטרינה AURA')">אני מעוניין במוצר</button>
+</div>
+</main>
+<script>
+function wa(product){
+ const msg='שלום, אני מעוניין במוצר: '+product+' ואשמח לקבל פרטים נוספים.';
+ location.href='https://wa.me/972527201271?text='+encodeURIComponent(msg);
+}
+</script>
+</body>
+</html>
