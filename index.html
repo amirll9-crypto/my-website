@@ -1,40 +1,54 @@
-<!doctype html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>המוצרים שלי</title>
-<style>
-body{font-family:Arial,sans-serif;margin:0;background:#f5f5f5;color:#222}
-main{max-width:520px;margin:auto;padding:24px 16px}
-h1{text-align:center;margin-bottom:24px}
-.card{background:white;border-radius:18px;padding:16px;margin:16px 0;box-shadow:0 4px 18px #0001}
-.card img{width:100%;border-radius:12px;display:block}
-.price{font-size:24px;font-weight:bold;margin:12px 0}
-button{width:100%;border:0;border-radius:12px;padding:14px;font-size:18px;font-weight:bold;background:#25D366;color:white;cursor:pointer}
-</style>
-</head>
-<body>
-<main>
-<h1>המוצרים שלי</h1>
-<div class="card">
-  <img src="product1.jpg" alt="משקולת מתכווננת">
-  <h2>משקולת מתכווננת</h2>
-  <div class="price">500 ₪</div>
-  <button onclick="wa('משקולת מתכווננת')">אני מעוניין במוצר</button>
-</div>
-<div class="card">
-  <img src="product2.jpg" alt="מקרר ויטרינה AURA">
-  <h2>מקרר ויטרינה AURA</h2>
-  <div class="price">450 ₪</div>
-  <button onclick="wa('מקרר ויטרינה AURA')">אני מעוניין במוצר</button>
-</div>
-</main>
-<script>
-function wa(product){
- const msg='שלום, אני מעוניין במוצר: '+product+' ואשמח לקבל פרטים נוספים.';
- location.href='https://wa.me/972527201271?text='+encodeURIComponent(msg);
-}
-</script>
-</body>
-</html>
+from pathlib import Path
+src = Path("/mnt/data/files/website_2.html")
+dst = Path("/mnt/data/website_shop_upgraded_new.html")
+html = src.read_text(encoding="utf-8")
+
+Add a simple in-page product manager while preserving the existing store.
+
+insert = r'''
+
+<style>  
+#manager{background:#fff;padding:18px;border-radius:18px;margin:20px 0;box-shadow:0 4px 18px #0001}  
+#manager input,#manager textarea{width:100%;box-sizing:border-box;padding:11px;margin:6px 0 10px;border:1px solid #ddd;border-radius:10px;font-size:16px}  
+#manager button{background:#222;color:#fff;border:0;border-radius:10px;padding:11px 15px;margin:4px;cursor:pointer}  
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap}  
+</style>  '''
+script = r'''
+
+<script>  
+let shopProducts=JSON.parse(localStorage.getItem('shopProducts')||'[]');  
+function openManager(){  
+ document.getElementById('manager').style.display='block';  
+}  
+function addProduct(){  
+ const n=document.getElementById('pname').value.trim(), p=document.getElementById('pprice').value, d=document.getElementById('pdesc').value.trim();  
+ const f=document.getElementById('pimage').files[0];  
+ if(!n||!p){alert('נא למלא שם ומחיר');return;}  
+ const save=(img)=>{shopProducts.push({n,p,d,img:img||''});localStorage.setItem('shopProducts',JSON.stringify(shopProducts));renderAdded();};  
+ if(f){const r=new FileReader();r.onload=()=>save(r.result);r.readAsDataURL(f);}else save('');  
+}  
+function renderAdded(){  
+ let box=document.getElementById('addedProducts');box.innerHTML='';  
+ shopProducts.forEach((x,i)=>{box.innerHTML+=`<div class="card">${x.img?`<img src="${x.img}" alt="">`:''}<h2>${x.n}</h2><div class="price">${x.p} ₪</div><p>${x.d}</p><button onclick="deleteProduct(${i})">מחיקה</button></div>`});  
+}  
+function deleteProduct(i){shopProducts.splice(i,1);localStorage.setItem('shopProducts',JSON.stringify(shopProducts));renderAdded();}  
+document.addEventListener('DOMContentLoaded',renderAdded);  
+</script>  '''
+marker = "<main>"
+html = html.replace("<style>", "<style>"+insert, 1)
+html = html.replace(marker, marker + r'''
+<button onclick="openManager()" style="width:100%;border:0;border-radius:12px;padding:14px;font-size:18px;font-weight:bold;background:#222;color:#fff;cursor:pointer">⚙️ ניהול והוספת מוצרים</button>
+
+<section id="manager" style="display:none">  
+<h2>הוספת מוצר</h2>  
+<label>שם המוצר</label><input id="pname" placeholder="שם המוצר">  
+<label>מחיר</label><input id="pprice" type="number" placeholder="500">  
+<label>תיאור</label><textarea id="pdesc" placeholder="תיאור המוצר"></textarea>  
+<label>תמונה</label><input id="pimage" type="file" accept="image/*">  
+<div class="admin-actions"><button onclick="addProduct()">➕ הוסף מוצר</button></div>  
+</section>  
+<div id="addedProducts"></div>  
+''', 1)  
+html = html.replace("</body>", script + "\n</body>")  
+dst.write_text(html, encoding="utf-8")  
+print(dst)  
